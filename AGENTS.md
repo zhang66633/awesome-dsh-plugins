@@ -1,6 +1,6 @@
 # AGENTS.md
 
-dsh-external 生态情报仓库（private）：对 `dsh-external` 组织全部仓库（动态发现，当前 134）的聚合调研，加上与**当日 mainline**（`dsh2026/test-AdamPlatin123` 最新快照分支）的自动兼容性对比。本仓库只承载情报、对比引擎与报告，不托管任何插件代码。
+dsh-external 生态情报仓库（private）：对 `dsh-external` 组织全部仓库（动态发现，当前 286+）的聚合调研，加上与**当日 mainline**（`dsh2026/test-AdamPlatin123` 最新快照分支）的自动兼容性对比。本仓库只承载情报、对比引擎与报告，不托管任何插件代码。
 
 ## Private 约束（最高优先级）
 
@@ -18,7 +18,7 @@ README.md                    # 项目说明 + 快速导航（链接 CHANGELOG �
 CHANGELOG.md                 # ★主更新视图：按日期倒序的每日条目（mainline 变更 + 生态兼容状态 + 报告链接）
 reports/                     # 按日期文件夹分立的报告（引擎自动生成）
   latest -> <最新日期>        # 软链接，始终指向最新日期文件夹
-  <YYYY-MM-DD>/              # 当日：mainline-compat.md + <repo>.md × 全部发现仓库（当前 134） + index.md
+  <YYYY-MM-DD>/              # 当日：mainline-compat.md + <repo>.md × 全部发现仓库（当前 286+） + index.md
 research/                    # 63 份静态调研摘要（只读资产，不在此编辑）
 context/                     # 旧 session 调研上下文归档（只读）
 cross-analysis/              # 聚合分析（只读）
