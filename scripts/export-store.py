@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""Store data export: curated catalog + researched plugins → generated/current/store.json
+"""Store data export: curated catalog + researched + L1-discovered → generated/current/store.json
 
 The clean, machine-readable dataset the DSH store panel consumes:
 - catalog/plugins/*.json entries with curation.state ∈ {candidate, listed}
   (the human-investigated trusted set — Radar 记录一切，商店只摆精挑过的)
-- plus researched radar candidates (has_research_note + is_plugin=true)
+- researched radar candidates (has_research_note + is_plugin=true)
   that are not yet seeded into the catalog
+- L1-passed discovered candidates (l1-scan.py 缓存 status=pass) as the
+  "自动发现" tier — L1 only proves "looks installable", not compatibility
 - excluded: rejected/removed/blocked, archived, forks, noise (is_plugin != true)
 
-Real-time is not required: run after discover+normalize, commit store.json, and
-the store panel fetches the committed snapshot (raw.githubusercontent.com) with
-a bundled fallback.
+Real-time is not required: run after discover+normalize+l1-scan, commit
+store.json, and the store panel fetches the committed snapshot with a
+bundled fallback.
 """
 from __future__ import annotations
 import json
@@ -21,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CAND = ROOT / "generated" / "current" / "candidates.json"
 CAT_VIEW = ROOT / "generated" / "current" / "catalog.json"
+L1 = ROOT / "generated" / "current" / "l1.json"
 OUT = ROOT / "generated" / "current" / "store.json"
 
 LISTED_STATES = {"candidate", "listed"}
@@ -96,6 +99,35 @@ def main() -> int:
             "updated_at": c.get("updated_at", ""),
             "is_plugin": True,
             "source": "researched",
+        })
+
+    # 3) L1-passed discovered candidates (auto tier; l1-scan.py cache)
+    l1 = load_json(L1, {})
+    l1_results = l1.get("results", {})
+    for c in candidates:
+        if c.get("is_plugin") is not True:
+            continue
+        if c.get("archived") or c.get("fork"):
+            continue
+        key = (c.get("full_name") or "").lower()
+        if not key or key in seen:
+            continue
+        r = l1_results.get(c.get("full_name"))
+        if not r or r.get("status") != "pass":
+            continue
+        seen.add(key)
+        plugins.append({
+            "name": c.get("full_name", ""),
+            "url": c.get("url", ""),
+            "description": c.get("description", ""),
+            "description_zh": "",
+            "category": "",
+            "stars": c.get("stars", 0),
+            "topics": c.get("topics", []) or [],
+            "updated_at": c.get("updated_at", ""),
+            "is_plugin": True,
+            "package": r.get("package", ""),
+            "source": "discovered",
         })
 
     plugins.sort(key=lambda p: (-p["stars"], p["name"].lower()))

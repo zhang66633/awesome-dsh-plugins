@@ -64,13 +64,14 @@ python3 scripts/discover.py          # 多路发现（org / topic:dsh-plugin 分
 python3 scripts/normalize.py         # 归并：candidates → curated catalog（种子仅限 researched+plugin；tombstone 禁止复活）
 python3 scripts/aggregate.py         # → summary.json（计数 / 证据轴 / 缩水守卫 fail-closed）
 python3 scripts/validate-catalog.py  # 发布门禁（schema / id+name 唯一 / 计数守恒 / never-pass 卫生）
-python3 scripts/export-store.py      # → store.json（curated + researched 精选集，供 dsh-plugin-store 消费）
+python3 scripts/l1-scan.py           # L1 清单扫描：package.json 探测（--min-stars 控量，结果缓存 l1.json 可续跑）
+python3 scripts/export-store.py      # → store.json（curated + researched + L1 自动发现三档，供商店消费）
 ```
 
 - 依赖：python3 / gh / jq；文件读写一律**显式 `encoding="utf-8"`**（Windows 默认 GBK 会崩中文描述）。
 - topic 搜索 API 单查询上限 1000 条：`topic:dsh-plugin` 按 star 分层（≥3 / 1..2 / 0）查询才能全量收录。
 - `is_plugin` 元数据启发式（discover.py）：denylist → False；名称含 dsh → True；topic+描述双证据 → True；仅 topic → unknown（疑似蹭标签）；无信号 → False。Catalog 只收录 True。
-- Radar 记录一切；商店只摆精选（export-store 只输出 curation.state ∈ candidate/listed + researched+plugin）。
+- Radar 记录一切；商店摆三档：curated（candidate/listed）+ researched（研究过）+ discovered（L1 pass 的自动发现，UI 打「自动发现」标——L1 只证明“看起来可安装”，不代表兼容或安全）。
 
 ## Commands
 
