@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "github:1334062194",
+  "repository": {
+    "full_name": "antinomie1/deepseek-harness-desktop",
+    "url": "https://github.com/antinomie1/deepseek-harness-desktop"
+  },
+  "package": {},
+  "curation": {
+    "state": "candidate",
+    "category": "",
+    "description_zh": ""
+  },
+  "ownership": {
+    "method": "auto_discovered",
+    "verified_at": ""
+  },
+  "lifecycle": {
+    "state": "active"
+  },
+  "disclosures": {
+    "risk": "unknown",
+    "network": false,
+    "filesystem": "none",
+    "credentials": [],
+    "data_handling_url": ""
+  }
+}
