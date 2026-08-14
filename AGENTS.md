@@ -14,22 +14,35 @@ dsh-external 生态情报仓库（private）：对 `dsh-external` 组织全部�
 ## Repository layout
 
 ```
-README.md                    # 项目说明 + 快速导航（链接 CHANGELOG 与最新报告）
+README.md                    # 项目说明 + 快速导航（含自动生成的分类目录块 AUTO:catalog）
 CHANGELOG.md                 # ★主更新视图：按日期倒序的每日条目（mainline 变更 + 生态兼容状态 + 报告链接）
-reports/                     # 按日期文件夹分立的报告（引擎自动生成）
+PLUGINS.md                   # 分类目录（功能领域）
+reports/                     # 按日期文件夹分立的对比报告（对比引擎自动生成）
   latest -> <最新日期>        # 软链接，始终指向最新日期文件夹
-  <YYYY-MM-DD>/              # 当日：mainline-compat.md + <repo>.md × 全部发现仓库（当前 286+） + index.md
-research/                    # 63 份静态调研摘要（只读资产，不在此编辑）
+  <YYYY-MM-DD>/              # 当日：mainline-compat.md + <repo>.md + index.md
+catalog/                     # 精选目录（curated fact source，按 stable github id 命名）
+  plugins/<github-id>.json   # per-plugin 条目（state=candidate，curation PR 转 listed）
+  policy.json                # 收录/风险/数量规则（normalize/aggregate 消费）
+  tombstones.json            # 墓碑：被除名 id 重新出现时禁止自动复活
+schema/                      # plugin / observation / summary 三个 JSON Schema
+generated/current/           # 流水线产物（gitignore）：candidates.json → catalog.json → store.json / summary.json
+research/                    # 静态调研摘要（只读资产，不在此编辑）
 context/                     # 旧 session 调研上下文归档（只读）
 cross-analysis/              # 聚合分析（只读）
 analysis/                    # 情报分析（插件格式 / 安全风险）
 actions/                     # 行动项草稿（org-issues.md / issue-roadmap.md）
 plan/                        # 计划与过程产物
-.agents/skills/mainline-compat/  # 对比引擎 skill（工作流 + SKILL.md）
-scripts/compare-mainline.sh  # 核心引擎（bash，零第三方依赖）
+docs/                        # SOP.md（自动化全链路）+ 专项文档
+scripts/                     # 两条流水线（见下）
+  compare-mainline.sh        # 对比引擎（bash，零第三方依赖）
+  discover.py normalize.py   # 目录流水线：多路发现 → 归并 curated 目录（python3）
+  aggregate.py validate-catalog.py export-store.py  # 汇总 / 门禁 / 商店数据导出（python3）
+  gen-catalog.sh update-readme.sh 等  # README 目录块 / 指标刷新
 .mainline/                   # mainline 快照 clone 缓存（gitignore，chmod 700）
-.clones/                     # 动态 clone 缓存（gitignore；当前含 15 仓，随索引增长）
+.clones/                     # 动态 clone 缓存（gitignore）
 .mainline-state.json         # 上次对比状态（lastMainlineCommit/lastDate/repos）
+desc-cache.json              # 仓库描述缓存（gen-catalog 消费）
+.support-status.json         # 支持状态标记（discover 消费）
 ```
 
 ## 对比引擎
@@ -43,6 +56,21 @@ bash scripts/compare-mainline.sh [--scope <file>] [--dry-run] [--base <commit>]
 - 退出码：`0` 全部兼容、`1` 存在需适配、`2` 脚本错误、`3` 离线。
 - `--dry-run` 全程只读：不写报告 / CHANGELOG / 状态 / 软链，缓存走临时目录。
 - 详细用法与输出约定见 `.agents/skills/mainline-compat/SKILL.md`。
+
+## 目录流水线（catalog pipeline）
+
+```sh
+python3 scripts/discover.py          # 多路发现（org / topic:dsh-plugin 分层 / topic:dsh-external / 关键词 / library）→ generated/current/candidates.json
+python3 scripts/normalize.py         # 归并：candidates → curated catalog（种子仅限 researched+plugin；tombstone 禁止复活）
+python3 scripts/aggregate.py         # → summary.json（计数 / 证据轴 / 缩水守卫 fail-closed）
+python3 scripts/validate-catalog.py  # 发布门禁（schema / id+name 唯一 / 计数守恒 / never-pass 卫生）
+python3 scripts/export-store.py      # → store.json（curated + researched 精选集，供 dsh-plugin-store 消费）
+```
+
+- 依赖：python3 / gh / jq；文件读写一律**显式 `encoding="utf-8"`**（Windows 默认 GBK 会崩中文描述）。
+- topic 搜索 API 单查询上限 1000 条：`topic:dsh-plugin` 按 star 分层（≥3 / 1..2 / 0）查询才能全量收录。
+- `is_plugin` 元数据启发式（discover.py）：denylist → False；名称含 dsh → True；topic+描述双证据 → True；仅 topic → unknown（疑似蹭标签）；无信号 → False。Catalog 只收录 True。
+- Radar 记录一切；商店只摆精选（export-store 只输出 curation.state ∈ candidate/listed + researched+plugin）。
 
 ## Commands
 
@@ -74,7 +102,7 @@ bash scripts/compare-mainline.sh --apply-fix         # 输出待修 diff（如 c
 - 证据规范：报告里的每个断言标注来源（仓库名 / commit / research 文件）；占位仓库（0 commit）不作事实引用。
 - 变更基线：首次运行（无 `.mainline-state.json`）以 `--base`（默认 `cab66cd`，0803 快照）为对比基线，用于产出首份 mainline 变更分析。
 - 目录纪律：`research/`、`context/`、`cross-analysis/`、`plan/`、`README.md` 是既有资产，对比引擎不得改写；新增产出一律落在 `reports/`、`CHANGELOG.md`、`.mainline-state.json` 与缓存目录。
-- 引擎脚本保持零第三方依赖（仅 bash/git/gh/jq）；新增逻辑不得引入 node/python 等运行时。
+- **对比引擎**（compare-mainline.sh）保持零第三方依赖（仅 bash/git/gh/jq）；目录流水线脚本用 python3 标准库 + gh，不得引入第三方 pip 包。
 
 ## Editing these instructions
 
