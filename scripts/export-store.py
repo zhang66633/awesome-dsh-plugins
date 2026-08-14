@@ -49,6 +49,10 @@ def main() -> int:
 
     plugins: list[dict] = []
     seen: set[str] = set()
+    l1 = load_json(L1, {})
+    l1_results = l1.get("results", {})
+    # 版本信息：l1 缓存里每个仓库 package.json 的 version（更新对比用）
+    latest_version_of = lambda fn: (l1_results.get(fn) or {}).get("version", "")
 
     # 1) curated catalog (trusted set, with live observation overlay)
     for entry in entries:
@@ -73,6 +77,7 @@ def main() -> int:
             "topics": cand.get("topics", []) or [],
             "updated_at": cand.get("updated_at", ""),
             "is_plugin": obs.get("is_plugin"),
+            "latest_version": latest_version_of(name),
             "source": "catalog",
         })
 
@@ -98,12 +103,11 @@ def main() -> int:
             "topics": c.get("topics", []) or [],
             "updated_at": c.get("updated_at", ""),
             "is_plugin": True,
+            "latest_version": latest_version_of(c.get("full_name", "")),
             "source": "researched",
         })
 
     # 3) L1-passed discovered candidates (auto tier; l1-scan.py cache)
-    l1 = load_json(L1, {})
-    l1_results = l1.get("results", {})
     for c in candidates:
         if c.get("is_plugin") is not True:
             continue
@@ -127,6 +131,7 @@ def main() -> int:
             "updated_at": c.get("updated_at", ""),
             "is_plugin": True,
             "package": r.get("package", ""),
+            "latest_version": r.get("version", ""),
             "source": "discovered",
         })
 

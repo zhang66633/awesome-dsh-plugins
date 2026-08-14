@@ -70,6 +70,7 @@ def fetch_package_json(full_name: str) -> dict:
     return {
         "status": "pass",
         "package": name,
+        "version": str(pkg.get("version") or "")[:40],
         "entry": ("main" if pkg.get("main") else "exports" if pkg.get("exports") else "dsh"),
     }
 
@@ -106,6 +107,11 @@ def main() -> int:
         if fn in results:
             continue  # cached — resume
         targets.append(fn)
+    # 已入库条目也取一次版本（供商店「可更新」对比），不重复扫已有缓存
+    for p in store.get("plugins", []):
+        fn = p.get("name", "")
+        if fn and fn not in results and fn not in targets:
+            targets.append(fn)
     targets.sort()
 
     scanned = 0
