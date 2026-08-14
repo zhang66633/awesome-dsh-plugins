@@ -34,4 +34,24 @@ Step 'profile reinstall (pnpm update)' {
   $env:CI = 'true'
   pnpm update dsh-plugin-installer
 }
+
+Step 'repair link junctions (pnpm cross-drive bug)' {
+  # pnpm 在 C: node_modules -> D: link: 目标时会生成损坏 junction（edge-case #16）。
+  # 每次 pnpm install/update 后都可能复发：按 package.json 的 link: 声明逐个重建。
+  $web = "$prof\node_modules"
+  $manifest = Get-Content "$prof\package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+  foreach ($prop in $manifest.dependencies.PSObject.Properties) {
+    $val = [string]$prop.Value
+    if ($val -like 'link:*') {
+      $name = $prop.Name
+      $real = $val.Substring(5).Replace('/', '\')
+      $link = Join-Path $web $name
+      if (-not (Test-Path (Join-Path $link 'package.json'))) {
+        if (Test-Path $link) { cmd /c rmdir /s /q "$link" 2>&1 | Out-Null }
+        cmd /c mklink /J "$link" "$real" 2>&1 | Out-Null
+        Write-Output "   repaired: $name -> $real"
+      }
+    }
+  }
+}
 Write-Output ("[{0}] done（重启 dsh web 生效新快照）" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')) | Tee-Object -FilePath $LOG -Append
