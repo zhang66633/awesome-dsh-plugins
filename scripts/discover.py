@@ -30,12 +30,48 @@ SUPPORT = ROOT / ".support-status.json"
 # because --paginate concatenates per-page output; .items[] for search, .[] for org list.
 SEARCHES = [
     ("org", "orgs/dsh-external/repos?per_page=100&type=all", ".[]"),
-    ("topic", "search/repositories?q=topic%3Adsh-plugin&per_page=100", ".items[]"),
+    # topic:dsh-plugin 按 star 分层：单查询 API 上限 1000 条，topic 总量已超，
+    # 分层后每层 <1000 才能全量收录（≥3: ~365 / 1..2: ~711 / 0: ~535）
+    ("topic", "search/repositories?q=topic%3Adsh-plugin+stars%3A%3E%3D3&per_page=100", ".items[]"),
+    ("topic", "search/repositories?q=topic%3Adsh-plugin+stars%3A1..2&per_page=100", ".items[]"),
+    ("topic", "search/repositories?q=topic%3Adsh-plugin+stars%3A0&per_page=100", ".items[]"),
     ("topic", "search/repositories?q=topic%3Adsh-external&per_page=100", ".items[]"),
     ("keyword", "search/repositories?q=deepseek+harness&per_page=100", ".items[]"),
     ("keyword", "search/repositories?q=DSH+plugin&per_page=100", ".items[]"),
     ("keyword", "search/repositories?q=dsh+plugin&per_page=100", ".items[]"),
 ]
+
+# 已知蹭 dsh-plugin 标签的非插件（denylist）：宿主本体、蹭曝光的明星项目
+NON_PLUGIN_DENY = {
+    "deepseek-ai/deepseek-harness",  # 宿主本体，不是插件
+    "nexu-io/open-design",           # 设计工具，蹭 dsh-plugin/dsh 标签
+}
+
+
+def classify_is_plugin(full_name: str, description: str, topics: list[str]) -> bool | str:
+    """元数据启发式 is_plugin 分类——无本地 clone 时也能把噪声与真插件分开。
+
+    规则（强→弱；topic 标签已被大量项目蹭，不能单独作证据）：
+      1. denylist 显式排除 → False
+      2. 仓库名含 dsh → True（强信号）
+      3. topic 标签 + 描述提到 dsh/harness → True（双证据）
+      4. 仅 topic 标签、描述无 dsh 信号 → "unknown"（疑似蹭标签，待人工确认）
+      5. 无任何 dsh 信号（关键词路径混入）→ False
+    Radar 记录一切；Catalog 只会收录 is_plugin=True。
+    """
+    if full_name.lower() in NON_PLUGIN_DENY:
+        return False
+    topics_l = {t.lower() for t in topics}
+    n = full_name.lower()
+    d = (description or "").lower()
+    has_topic = "dsh-plugin" in topics_l or "dsh-external" in topics_l
+    if "dsh" in n:
+        return True
+    if has_topic and ("dsh" in d or "harness" in d or "插件" in d):
+        return True
+    if has_topic:
+        return "unknown"
+    return False
 
 
 def gh(path: str, jq: str, timeout: int = 120) -> list[dict]:
@@ -43,7 +79,8 @@ def gh(path: str, jq: str, timeout: int = 120) -> list[dict]:
     try:
         r = subprocess.run(
             ["gh", "api", "--paginate", path, "--jq", jq],
-            capture_output=True, text=True, timeout=timeout,
+            # 显式 UTF-8：gh 输出是 UTF-8，Windows 默认 GBK 解码会崩（中文/emoji 描述）
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout,
         )
         if r.returncode != 0:
             print(f"[discover] gh api FAILED {path}: {r.stderr.strip()[:160]}", file=sys.stderr)
@@ -73,7 +110,7 @@ def read_clone_pkg(name_bare: str) -> tuple[bool, str, str]:
     if not pkg.is_file():
         return (False, "", "")
     try:
-        d = json.loads(pkg.read_text(errors="replace"))
+        d = json.loads(pkg.read_text(encoding="utf-8", errors="replace"))
     except json.JSONDecodeError:
         return (False, "", "")
     name = d.get("name", "") or ""
@@ -106,7 +143,10 @@ def main() -> int:
                 "description": it.get("description") or "", "archived": bool(it.get("archived")),
                 "fork": bool(it.get("fork")), "stars": it.get("stargazers_count", 0),
                 "updated_at": it.get("updated_at", ""), "topics": it.get("topics", []) or [],
-                "sources": [], "is_plugin": "unknown", "package": {}, "has_research_note": False,
+                "sources": [],
+                "is_plugin": classify_is_plugin(
+                    it.get("full_name", ""), it.get("description") or "", it.get("topics", []) or []),
+                "package": {}, "has_research_note": False,
                 "support": "", "evidence": {},
             })
             if label not in entry["sources"]:
@@ -125,7 +165,7 @@ def main() -> int:
     support = {}
     if SUPPORT.is_file():
         try:
-            support = json.loads(SUPPORT.read_text())
+            support = json.loads(SUPPORT.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             pass
 
@@ -177,7 +217,7 @@ def main() -> int:
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     tmp = OUT.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2))
+    tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
     tmp.replace(OUT)
     print(f"[discover] {len(candidates)} candidates → {OUT.relative_to(ROOT)}")
     print(f"[discover] sources: {source_counts}")

@@ -30,7 +30,7 @@ def load_json(p: Path, default):
     if not p.is_file():
         return default
     try:
-        return json.loads(p.read_text())
+        return json.loads(p.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return default
 
@@ -52,7 +52,7 @@ def main() -> int:
     blocked_ids = {e.get("id") for e in tomb.get("entries", []) if e.get("id")}
 
     CAT_DIR.mkdir(parents=True, exist_ok=True)
-    existing = {p.stem: json.loads(p.read_text()) for p in CAT_DIR.glob("*.json") if p.is_file()}
+    existing = {p.stem: json.loads(p.read_text(encoding="utf-8")) for p in CAT_DIR.glob("*.json") if p.is_file()}
 
     run_id = radar.get("run_id", "")
     observed_at = radar.get("observed_at", "")
@@ -84,7 +84,7 @@ def main() -> int:
                 "disclosures": {"risk": "unknown", "network": False, "filesystem": "none",
                                 "credentials": [], "data_handling_url": ""},
             }
-            (CAT_DIR / f"{fn}.json").write_text(json.dumps(entry, ensure_ascii=False, indent=2))
+            (CAT_DIR / f"{fn}.json").write_text(json.dumps(entry, ensure_ascii=False, indent=2), encoding="utf-8")
             seeded += 1
             existing[fn] = entry
         else:
@@ -113,7 +113,7 @@ def main() -> int:
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     tmp = OUT.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2))
+    tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
     tmp.replace(OUT)
     print(f"[normalize] catalog view {len(catalog_view)} → {OUT.relative_to(ROOT)}")
     print(f"[normalize] seeded {seeded} new catalog entries (researched+plugin); blocked {blocked_readds} tombstone re-adds")

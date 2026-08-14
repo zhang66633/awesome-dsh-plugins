@@ -24,7 +24,7 @@ NEVER_PASS = {"not_run", "inconclusive"}
 
 
 def load(p: Path):
-    return json.loads(p.read_text()) if p.is_file() else {}
+    return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {}
 
 
 def main() -> int:
@@ -74,7 +74,7 @@ def main() -> int:
 
     pipeline = subprocess.run(
         ["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"],
-        capture_output=True, text=True,
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
     ).stdout.strip() or "unknown"
 
     summary = {
@@ -97,7 +97,7 @@ def main() -> int:
         "shrinkage_ok": shrink_ok,
     }
     tmp = OUT.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(summary, ensure_ascii=False, indent=2))
+    tmp.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     tmp.replace(OUT)
     print(f"[aggregate] summary → {OUT.relative_to(ROOT)}")
     print(f"[aggregate] total={summary['counts']['total']} candidate={states['candidate']} listed={states['listed']} | new={new_since} removed={removed_since} shrinkage_ok={shrink_ok}")

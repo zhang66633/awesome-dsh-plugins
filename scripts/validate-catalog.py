@@ -28,7 +28,7 @@ except ImportError:
 
 
 def load(p: Path):
-    return json.loads(p.read_text()) if p.is_file() else {}
+    return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {}
 
 
 def struct_check(entry: dict) -> list[str]:
@@ -51,7 +51,7 @@ def main() -> int:
     entries = []
     for p in sorted(CAT_DIR.glob("*.json")):
         try:
-            e = json.loads(p.read_text())
+            e = json.loads(p.read_text(encoding="utf-8"))
         except json.JSONDecodeError as ex:
             errors.append(f"{p.name}: invalid JSON ({ex})")
             continue
