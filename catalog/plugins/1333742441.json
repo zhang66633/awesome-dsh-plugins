@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "github:1333742441",
+  "repository": {
+    "full_name": "cyzlmh/dsh-pi-adapter",
+    "url": "https://github.com/cyzlmh/dsh-pi-adapter"
+  },
+  "package": {},
+  "curation": {
+    "state": "candidate",
+    "category": "",
+    "description_zh": ""
+  },
+  "ownership": {
+    "method": "auto_discovered",
+    "verified_at": ""
+  },
+  "lifecycle": {
+    "state": "active"
+  },
+  "disclosures": {
+    "risk": "unknown",
+    "network": false,
+    "filesystem": "none",
+    "credentials": [],
+    "data_handling_url": ""
+  }
+}

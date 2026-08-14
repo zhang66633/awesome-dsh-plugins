@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "github:1333865233",
+  "repository": {
+    "full_name": "237229953-create/dsh-vision",
+    "url": "https://github.com/237229953-create/dsh-vision"
+  },
+  "package": {},
+  "curation": {
+    "state": "candidate",
+    "category": "",
+    "description_zh": ""
+  },
+  "ownership": {
+    "method": "auto_discovered",
+    "verified_at": ""
+  },
+  "lifecycle": {
+    "state": "active"
+  },
+  "disclosures": {
+    "risk": "unknown",
+    "network": false,
+    "filesystem": "none",
+    "credentials": [],
+    "data_handling_url": ""
+  }
+}

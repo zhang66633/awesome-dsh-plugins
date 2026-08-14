@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "github:1333285656",
+  "repository": {
+    "full_name": "iuikj/dsh-desktop",
+    "url": "https://github.com/iuikj/dsh-desktop"
+  },
+  "package": {},
+  "curation": {
+    "state": "candidate",
+    "category": "",
+    "description_zh": ""
+  },
+  "ownership": {
+    "method": "auto_discovered",
+    "verified_at": ""
+  },
+  "lifecycle": {
+    "state": "active"
+  },
+  "disclosures": {
+    "risk": "unknown",
+    "network": false,
+    "filesystem": "none",
+    "credentials": [],
+    "data_handling_url": ""
+  }
+}

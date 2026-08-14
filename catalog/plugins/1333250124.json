@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "github:1333250124",
+  "repository": {
+    "full_name": "KnCRJVirX/dsh-desktop",
+    "url": "https://github.com/KnCRJVirX/dsh-desktop"
+  },
+  "package": {},
+  "curation": {
+    "state": "candidate",
+    "category": "",
+    "description_zh": ""
+  },
+  "ownership": {
+    "method": "auto_discovered",
+    "verified_at": ""
+  },
+  "lifecycle": {
+    "state": "active"
+  },
+  "disclosures": {
+    "risk": "unknown",
+    "network": false,
+    "filesystem": "none",
+    "credentials": [],
+    "data_handling_url": ""
+  }
+}

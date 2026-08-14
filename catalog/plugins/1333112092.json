@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "github:1333112092",
+  "repository": {
+    "full_name": "ccch1mneyyy/dsh-working-activity",
+    "url": "https://github.com/ccch1mneyyy/dsh-working-activity"
+  },
+  "package": {},
+  "curation": {
+    "state": "candidate",
+    "category": "",
+    "description_zh": ""
+  },
+  "ownership": {
+    "method": "auto_discovered",
+    "verified_at": ""
+  },
+  "lifecycle": {
+    "state": "active"
+  },
+  "disclosures": {
+    "risk": "unknown",
+    "network": false,
+    "filesystem": "none",
+    "credentials": [],
+    "data_handling_url": ""
+  }
+}

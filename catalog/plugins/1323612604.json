@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "github:1323612604",
+  "repository": {
+    "full_name": "william-jin-cmu/dsh-companion",
+    "url": "https://github.com/william-jin-cmu/dsh-companion"
+  },
+  "package": {},
+  "curation": {
+    "state": "candidate",
+    "category": "",
+    "description_zh": ""
+  },
+  "ownership": {
+    "method": "auto_discovered",
+    "verified_at": ""
+  },
+  "lifecycle": {
+    "state": "active"
+  },
+  "disclosures": {
+    "risk": "unknown",
+    "network": false,
+    "filesystem": "none",
+    "credentials": [],
+    "data_handling_url": ""
+  }
+}

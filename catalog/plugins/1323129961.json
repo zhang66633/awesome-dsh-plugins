@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "github:1323129961",
+  "repository": {
+    "full_name": "vlln/plugin-registry",
+    "url": "https://github.com/vlln/plugin-registry"
+  },
+  "package": {},
+  "curation": {
+    "state": "candidate",
+    "category": "",
+    "description_zh": ""
+  },
+  "ownership": {
+    "method": "auto_discovered",
+    "verified_at": ""
+  },
+  "lifecycle": {
+    "state": "active"
+  },
+  "disclosures": {
+    "risk": "unknown",
+    "network": false,
+    "filesystem": "none",
+    "credentials": [],
+    "data_handling_url": ""
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "github:1333693108",
+  "repository": {
+    "full_name": "xingj404-lab/dsh-desktop",
+    "url": "https://github.com/xingj404-lab/dsh-desktop"
+  },
+  "package": {},
+  "curation": {
+    "state": "candidate",
+    "category": "",
+    "description_zh": ""
+  },
+  "ownership": {
+    "method": "auto_discovered",
+    "verified_at": ""
+  },
+  "lifecycle": {
+    "state": "active"
+  },
+  "disclosures": {
+    "risk": "unknown",
+    "network": false,
+    "filesystem": "none",
+    "credentials": [],
+    "data_handling_url": ""
+  }
+}
